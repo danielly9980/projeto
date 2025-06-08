@@ -1,149 +1,127 @@
 #include <iostream>
 #include <vector>
-#include <set>
-#include <algorithm>
 
 using namespace std;
 
-#define ll long long int
-
-struct Vertice {
-    ll No;
-    ll Grau;
-    set<ll> Adj;
-
-    Vertice(ll Indicador = 0) {
-        this->No = Indicador;
-        this->Grau = 0;
-    }
-};
-
-class Grafos {
+class Grafo {
 public:
-    ll QV;       
-    ll QE;       
-    Vertice* Vert;
+    int V; // Número de vértices
+    vector<vector<int>> adj; // Matriz de adjacência
 
-    
-    Grafos(ll V) {
-        this->QV = V;
-        this->QE = 0;
-        this->Vert = new Vertice[V]();
-        for (ll i = 0; i < this->QV; i++)
-            this->Vert[i].No = i;
+    Grafo(int V) {
+        this->V = V;
+        adj.resize(V, vector<int>(V, 0));
     }
 
-    void Inserir_Aresta_(int V, int W) {
-        if (V != W && Vert[V].Adj.find(W) == Vert[V].Adj.end()) {
-            this->QE++;
-            Vert[V].Adj.insert(W);
-            Vert[W].Adj.insert(V);
-            Vert[V].Grau++;
-            Vert[W].Grau++;
-        }
+    void adicionarAresta(int u, int v) {
+        adj[u][v]++;
+        adj[v][u]++;
     }
 
-    void Remover_Aresta_(int V, int W) {
-        if (Vert[V].Adj.find(W) != Vert[V].Adj.end()) {
-            this->QE--;
-            Vert[V].Adj.erase(W);
-            Vert[W].Adj.erase(V);
-            Vert[V].Grau--;
-            Vert[W].Grau--;
-        }
+    void removerAresta(int u, int v) {
+        adj[u][v]--;
+        adj[v][u]--;
     }
 
-    void DFS(int V, vector<bool>& visitado) {
-        visitado[V] = true;
-        for (int viz : Vert[V].Adj)
-            if (!visitado[viz])
-                DFS(viz, visitado);
+    void dfs(int v, vector<bool>& visitado) {
+        visitado[v] = true;
+        for (int i = 0; i < V; i++)
+            if (adj[v][i] > 0 && !visitado[i])
+                dfs(i, visitado);
     }
 
-    bool Aresta_Eh_Ponte(int V, int W) {
-        vector<bool> visitado1(QV, false);
-        DFS(V, visitado1);
-        int alc1 = count(visitado1.begin(), visitado1.end(), true);
+    bool arestaEhPonte(int u, int v) {
+        if (adj[u][v] == 0) return false;
 
-        Remover_Aresta_(V, W);
-        vector<bool> visitado2(QV, false);
-        DFS(V, visitado2);
-        int alc2 = count(visitado2.begin(), visitado2.end(), true);
+        // Se for a única aresta, pode usar
+        int count = 0;
+        for (int i = 0; i < V; i++) count += adj[u][i];
+        if (count == 1) return false;
 
-        Inserir_Aresta_(V, W);
+        // Verifica conectividade antes de remover
+        vector<bool> visitado1(V, false);
+        dfs(u, visitado1);
+        int alcançáveis1 = 0;
+        for (bool v : visitado1) if (v) alcançáveis1++;
 
-        return alc2 < alc1;
+        removerAresta(u, v);
+        vector<bool> visitado2(V, false);
+        dfs(u, visitado2);
+        int alcançáveis2 = 0;
+        for (bool v : visitado2) if (v) alcançáveis2++;
+        adicionarAresta(u, v); // restaura
+
+        return alcançáveis2 < alcançáveis1;
     }
 
-    void Algoritmo_Fleury() {
-        int inicio = -1;
-        int impares = 0;
-
-        for (int i = 0; i < QV; i++) {
-            if (Vert[i].Grau % 2 != 0) {
-                impares++;
-                if (inicio == -1) inicio = i;
+    void fleury(int u) {
+        for (int v = 0; v < V; v++) {
+            if (adj[u][v] > 0 && !arestaEhPonte(u, v)) {
+                cout << u + 1 << " -> ";
+                removerAresta(u, v);
+                fleury(v);
+                return;
             }
         }
 
-        if (impares != 0 && impares != 2) {
-            cout << "\n[!] O grafo NÃO possui caminho nem circuito euleriano.\n";
+        for (int v = 0; v < V; v++) {
+            if (adj[u][v] > 0) {
+                cout << u + 1 << " -> ";
+                removerAresta(u, v);
+                fleury(v);
+                return;
+            }
+        }
+
+        cout << u + 1;
+    }
+
+    void encontrarCaminhoEuleriano() {
+        int impar = 0;
+        int inicio = 0;
+        for (int i = 0; i < V; i++) {
+            int grau = 0;
+            for (int j = 0; j < V; j++)
+                grau += adj[i][j];
+            if (grau % 2 == 1) {
+                impar++;
+                inicio = i;
+            }
+        }
+
+        if (impar != 0 && impar != 2) {
+            cout << "[!] O grafo NÃO tem caminho nem circuito euleriano.\n";
             return;
         }
 
-        if (inicio == -1)
-            for (int i = 0; i < QV; i++)
-                if (!Vert[i].Adj.empty()) {
-                    inicio = i;
-                    break;
-                }
-
         cout << "\nCaminho Euleriano:\n";
-        Fleury(inicio);
+        fleury(inicio);
         cout << endl;
     }
 
-    void Fleury(int V) {
-        for (auto it = Vert[V].Adj.begin(); it != Vert[V].Adj.end(); ) {
-            int W = *it;
-            if (!Aresta_Eh_Ponte(V, W) || Vert[V].Adj.size() == 1) {
-                cout << V + 1 << " -> ";
-                Remover_Aresta_(V, W);
-                Fleury(W);
-                return;
-            } else {
-                ++it;
-            }
-        }
-        cout << V + 1;
-    }
-
-    void Imprimir_Grafo_() {
-        cout << "\nGrafo - Lista de Adjacência:\n";
-        for (ll V = 0; V < QV; V++) {
-            cout << "  " << V+1 << ":";
-            for (auto& adj : Vert[V].Adj)
-                cout << " " << adj+1;
+    void imprimirMatriz() {
+        cout << "\nMatriz de Adjacência:\n";
+        for (int i = 0; i < V; i++) {
+            for (int j = 0; j < V; j++)
+                cout << adj[i][j] << " ";
             cout << endl;
         }
     }
-
-    ~Grafos() {
-        delete[] Vert;
-    }
 };
 
+/* ========== Função principal ========== */
 int main() {
-    Grafos G(4);  
+    Grafo G(5);
 
-    G.Inserir_Aresta_(0, 1);
-    G.Inserir_Aresta_(1, 2);
-    G.Inserir_Aresta_(2, 3);
-    G.Inserir_Aresta_(3, 0);
-    G.Inserir_Aresta_(0, 2);  
+    // Grafo com circuito euleriano
+    G.adicionarAresta(0, 1);
+    G.adicionarAresta(1, 2);
+    G.adicionarAresta(2, 3);
+    G.adicionarAresta(3, 0);
+    G.adicionarAresta(0, 2);
 
-    G.Imprimir_Grafo_();
-    G.Algoritmo_Fleury();
+    G.imprimirMatriz();
+    G.encontrarCaminhoEuleriano();
 
     return 0;
 }
