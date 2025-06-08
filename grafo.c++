@@ -7,7 +7,6 @@ using namespace std;
 
 #define ll long long int
 
-/*  Estrutura de um vértice. */
 struct Vertice {
     ll No;
     ll Grau;
@@ -19,11 +18,10 @@ struct Vertice {
     }
 };
 
-/* Classe do grafo */
 class Grafos {
 public:
-    ll QV;       // Quantidade de vértices
-    ll QE;       // Quantidade de arestas
+    ll QV;       
+    ll QE;       
     Vertice* Vert;
 
     // Construtor
@@ -35,7 +33,6 @@ public:
             this->Vert[i].No = i;
     }
 
-    // Inserir aresta
     void Inserir_Aresta_(int V, int W) {
         if (V != W && Vert[V].Adj.find(W) == Vert[V].Adj.end()) {
             this->QE++;
@@ -46,7 +43,6 @@ public:
         }
     }
 
-    // Remover aresta
     void Remover_Aresta_(int V, int W) {
         if (Vert[V].Adj.find(W) != Vert[V].Adj.end()) {
             this->QE--;
@@ -57,7 +53,6 @@ public:
         }
     }
 
-    // DFS para checar conectividade
     void DFS(int V, vector<bool>& visitado) {
         visitado[V] = true;
         for (int viz : Vert[V].Adj)
@@ -65,7 +60,6 @@ public:
                 DFS(viz, visitado);
     }
 
-    // Checa se a aresta (V, W) é ponte
     bool Aresta_Eh_Ponte(int V, int W) {
         vector<bool> visitado1(QV, false);
         DFS(V, visitado1);
@@ -81,7 +75,6 @@ public:
         return alc2 < alc1;
     }
 
-    // Função principal de Fleury
     void Algoritmo_Fleury() {
         int inicio = -1;
         int impares = 0;
@@ -110,7 +103,6 @@ public:
         cout << endl;
     }
 
-    // Execução do algoritmo de Fleury
     void Fleury(int V) {
         for (auto it = Vert[V].Adj.begin(); it != Vert[V].Adj.end(); ) {
             int W = *it;
@@ -126,7 +118,6 @@ public:
         cout << V + 1;
     }
 
-    // Imprimir grafo
     void Imprimir_Grafo_() {
         cout << "\nGrafo - Lista de Adjacência:\n";
         for (ll V = 0; V < QV; V++) {
@@ -142,16 +133,15 @@ public:
     }
 };
 
-/* ========== FUNÇÃO PRINCIPAL ========== */
 int main() {
-    Grafos G(5);  // Criação do grafo com 5 vértices (0 a 4)
+    Grafos G(5);  
 
     // Inserindo arestas
     G.Inserir_Aresta_(0, 1);
     G.Inserir_Aresta_(1, 2);
     G.Inserir_Aresta_(2, 3);
     G.Inserir_Aresta_(3, 0);
-    G.Inserir_Aresta_(0, 2);  // Adiciona ciclo euleriano
+    G.Inserir_Aresta_(0, 2);  
 
     G.Imprimir_Grafo_();
     G.Algoritmo_Fleury();
