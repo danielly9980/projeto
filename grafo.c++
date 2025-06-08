@@ -24,7 +24,7 @@ public:
     ll QE;       
     Vertice* Vert;
 
-    // Construtor
+    
     Grafos(ll V) {
         this->QV = V;
         this->QE = 0;
