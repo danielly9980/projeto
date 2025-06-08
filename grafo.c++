@@ -134,7 +134,7 @@ public:
 };
 
 int main() {
-    Grafos G(5);  
+    Grafos G(4);  
 
     G.Inserir_Aresta_(0, 1);
     G.Inserir_Aresta_(1, 2);
