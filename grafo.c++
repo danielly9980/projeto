@@ -136,7 +136,6 @@ public:
 int main() {
     Grafos G(5);  
 
-    // Inserindo arestas
     G.Inserir_Aresta_(0, 1);
     G.Inserir_Aresta_(1, 2);
     G.Inserir_Aresta_(2, 3);
