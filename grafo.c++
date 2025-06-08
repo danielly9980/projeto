@@ -5,8 +5,8 @@ using namespace std;
 
 class Grafo {
 public:
-    int V; // Número de vértices
-    vector<vector<int>> adj; // Matriz de adjacência
+    int V; 
+    vector<vector<int>> adj; 
 
     Grafo(int V) {
         this->V = V;
@@ -49,7 +49,7 @@ public:
         dfs(u, visitado2);
         int alcançáveis2 = 0;
         for (bool v : visitado2) if (v) alcançáveis2++;
-        adicionarAresta(u, v); // restaura
+        adicionarAresta(u, v); 
 
         return alcançáveis2 < alcançáveis1;
     }
@@ -109,11 +109,11 @@ public:
     }
 };
 
-/* ========== Função principal ========== */
+
 int main() {
     Grafo G(5);
 
-    // Grafo com circuito euleriano
+
     G.adicionarAresta(0, 1);
     G.adicionarAresta(1, 2);
     G.adicionarAresta(2, 3);
